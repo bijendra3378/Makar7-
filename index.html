@@ -1,156 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title> Makar7- HD Passport Photo Maker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="EY6Zad842ktm-smtiVoeq7Ya9vjKGKC9s6WAmS5smPY" />
+    <title>MAKAR7 - HD Passport Photo Maker</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<meta name="google-site-verification" content="EY6Zad842ktm-smtiVoeq7Ya9vjKGKC9s6WAmS5smPY" />
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<style>
-body {
-    font-family: Arial;
-    text-align: center;
-    background: #f5f5f5;
-}
-h1 {
-    margin-top: 20px;
-}
-.controls {
-    margin: 20px;
-}
-canvas {
-    background: white;
-    border: 1px solid black;
-    margin-top: 20px;
-    width: 300px; /* preview small */
-}
-button {
-    padding: 10px 20px;
-    margin: 10px;
-    cursor: pointer;
-}
-</style>
-</head>
-
-<body>
-    <h1>Makar7</h1>
-<h1>Passport Photo Maker</h1>
-
-<div class="controls">
-    <input type="file" id="upload" accept="image/*"><br><br>
-
-    <button onclick="generate()">Generate</button>
-    <button onclick="printPage()">Print</button>
-    <button onclick="downloadPDF()">Download PDF</button>
-</div>
-
-<!-- ✅ 300 DPI A4 Canvas -->
-<canvas id="canvas" width="2480" height="3508"></canvas>
-
-<script>
-let img = new Image();
-
-document.getElementById("upload").addEventListener("change", function(e){
-    const reader = new FileReader();
-    reader.onload = function(event){
-        img.src = event.target.result;
-    }
-    reader.readAsDataURL(e.target.files[0]);
-});
-
-async function generate() {
-    if (!img.src) {
-        alert("Upload image first");
-        return;
-    }
-
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-
-    // ✅ HD smoothing
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-
-    // white background
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // ✅ 300 DPI conversion
-    let dpi = 300;
-    let width = (35 / 25.4) * dpi;   // 35mm
-    let height = (45 / 25.4) * dpi;  // 45mm
-
-    // face crop default
-    let faceX = 0, faceY = 0, faceW = img.width, faceH = img.height;
-
-    // ✅ Face detection (if supported)
-    if ('FaceDetector' in window) {
-        try {
-            const detector = new FaceDetector();
-            const faces = await detector.detect(img);
-            if (faces.length > 0) {
-                let f = faces[0].boundingBox;
-                faceX = f.x;
-                faceY = f.y;
-                faceW = f.width;
-                faceH = f.height;
-            }
-        } catch(e) {
-            console.log("Face detection failed");
+    <style>
+        /* --- CSS STYLES --- */
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
         }
-    }
 
-    // layout
-    let cols = 4;
-    let rows = 2;
-    let gap = 80;
-    let startX = 150;
-    let startY = 150;
+        body{
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0B1220, #16213E, #2563EB);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-    for(let r = 0; r < rows; r++){
-        for(let c = 0; c < cols; c++){
-            let x = startX + c * (width + gap);
-            let y = startY + r * (height + gap);
+        .container{
+            width: 100%;
+            max-width: 1000px;
+        }
 
-            ctx.drawImage(
-                img,
-                faceX, faceY, faceW, faceH,
-                x, y, width, height
+        .card{
+            background: rgba(255, 255, 255, .10);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, .18);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, .40);
+        }
+
+        .header{
+            text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .header i{
+            font-size: 60px;
+            color: #60A5FA;
+            margin-bottom: 10px;
+        }
+
+        .header h1{
+            font-size: 38px;
+            font-weight: 700;
+        }
+
+        .header p{
+            margin-top: 8px;
+            opacity: .9;
+        }
+
+        .upload-box{
+            margin-bottom: 25px;
+        }
+
+        .upload-box label{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 170px;
+            border: 2px dashed rgba(255, 255, 255, .5);
+            border-radius: 20px;
+            cursor: pointer;
+            color: #fff;
+            transition: .3s;
+        }
+
+        .upload-box label:hover{
+            background: rgba(255, 255, 255, .08);
+        }
+
+        .upload-box i{
+            font-size: 50px;
+            margin-bottom: 12px;
+        }
+
+        .upload-box span{
+            margin-top: 10px;
+            opacity: .8;
+        }
+
+        /* Hidden from website */
+        .details{
+            display: none;
+        }
+
+        .buttons{
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .buttons button{
+            padding: 15px 25px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            transition: .3s;
+        }
+
+        .buttons button:hover{
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(37, 99, 235, .4);
+        }
+
+        .preview{
+            background: #fff;
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .preview h2{
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        canvas{
+            width: 100%;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        @media(max-width: 768px){
+            .card{
+                padding: 20px;
+            }
+            .header h1{
+                font-size: 30px;
+            }
+            .buttons{
+                flex-direction: column;
+            }
+            .buttons button{
+                width: 100%;
+            }
+            .upload-box label{
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            
+            <div class="header">
+                <i class="fa-solid fa-camera"></i>
+                <h1>MAKAR7</h1>
+                <p>HD Passport Photo Maker</p>
+            </div>
+
+            <div class="upload-box">
+                <label for="upload">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <h2>Upload Passport Photo</h2>
+                    <span>Click Here</span>
+                </label>
+                <input type="file" id="upload" accept="image/*" hidden>
+            </div>
+
+            <div class="details">
+                <div class="box">
+                    <i class="fa-solid fa-file"></i>
+                    <b>Paper Size</b>
+                    <span>A4 (210 × 297 mm)</span>
+                </div>
+                <div class="box">
+                    <i class="fa-solid fa-image"></i>
+                    <b>Photo Size</b>
+                    <span>35 × 45 mm</span>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button id="generateBtn">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
+                </button>
+                <button id="printBtn">
+                    <i class="fa-solid fa-print"></i> Print
+                </button>
+                <button id="downloadBtn">
+                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+                </button>
+            </div>
+
+            <div class="preview">
+                <h2>A4 Preview</h2>
+                <canvas id="canvas" width="2480" height="3508"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const upload = document.getElementById("upload");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const generateBtn = document.getElementById("generateBtn");
+        const printBtn = document.getElementById("printBtn");
+        const downloadBtn = document.getElementById("downloadBtn");
+
+        let img = new Image();
+
+        upload.addEventListener("change", function(e){
+            const file = e.target.files[0];
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event){
+                img.onload = function(){
+                    preview();
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // Preview Function
+        function preview(){
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const scale = Math.min(
+                (canvas.width - 300) / img.width,
+                (canvas.height - 300) / img.height
             );
 
-            ctx.strokeStyle = "black";
-            ctx.strokeRect(x, y, width, height);
+            const w = img.width * scale;
+            const h = img.height * scale;
+
+            const x = (canvas.width - w) / 2;
+            const y = (canvas.height - h) / 2;
+
+            ctx.drawImage(img, x, y, w, h);
         }
-    }
-}
 
-// ✅ PRINT
-function printPage(){
-    let dataUrl = document.getElementById("canvas").toDataURL("image/jpeg", 1.0);
-    let win = window.open('');
-    win.document.write('<img src="'+dataUrl+'" style="width:100%" onload="window.print();window.close()">');
-}
+        // Generate Passport Grid
+        generateBtn.addEventListener("click", async () => {
+            if(!img.src){
+                alert("Please Upload Image");
+                return;
+            }
 
-// ✅ HD PDF DOWNLOAD
-function downloadPDF(){
-    const { jsPDF } = window.jspdf;
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    let canvas = document.getElementById("canvas");
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
 
-    // high quality image
-    let imgData = canvas.toDataURL("image/jpeg", 1.0);
+            const dpi = 300;
+            const photoWidth = (35 / 25.4) * dpi;
+            const photoHeight = (45 / 25.4) * dpi;
 
-    let pdf = new jsPDF('p', 'mm', 'a4');
+            let sx = 0;
+            let sy = 0;
+            let sw = img.width;
+            let sh = img.height;
 
-    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+            // Optional Experimental Face Detection
+            if("FaceDetector" in window){
+                try{
+                    const detector = new FaceDetector();
+                    const faces = await detector.detect(img);
+                    if(faces.length){
+                        const face = faces[0].boundingBox;
+                        sx = face.x;
+                        sy = face.y;
+                        sw = face.width;
+                        sh = face.height;
+                    }
+                }catch(e){}
+            }
 
-    pdf.save("passport_hd.pdf");
-}
-</script>
+            const cols = 4;
+            const rows = 2;
+            const gap = 70;
 
+            const totalWidth = (cols * photoWidth) + ((cols - 1) * gap);
+            const startX = (canvas.width - totalWidth) / 2;
+            const startY = 250; 
+
+            for(let r = 0; r < rows; r++){
+                for(let c = 0; c < cols; c++){
+                    const x = startX + c * (photoWidth + gap);
+                    const y = startY + r * (photoHeight + gap);
+
+                    ctx.drawImage(
+                        img,
+                        sx, sy, sw, sh,
+                        x, y, photoWidth, photoHeight
+                    );
+
+                    ctx.strokeStyle = "#777";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x, y, photoWidth, photoHeight);
+                }
+            }
+        });
+
+        // Print Function
+        printBtn.addEventListener("click", () => {
+            const image = canvas.toDataURL("image/jpeg", 1);
+            const win = window.open("");
+            win.document.write(`
+                <img src="${image}" style="width:100%" onload="window.print();window.close()">
+            `);
+        });
+
+        // Download PDF Function
+        downloadBtn.addEventListener("click", () => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: "portrait",
+                unit: "mm",
+                format: "a4"
+            });
+
+            const image = canvas.toDataURL("image/jpeg", 1);
+            pdf.addImage(image, "JPEG", 0, 0, 210, 297);
+            pdf.save("Makar7-HD-Passport-Photo-A4.pdf");
+        });
+    </script>
 </body>
 </html>
-
-
