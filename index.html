@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="EY6Zad842ktm-smtiVoeq7Ya9vjKGKC9s6WAmS5smPY" />
     <title>MAKAR7 HD Passport Photo Maker</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
@@ -366,11 +365,11 @@
                 return;
             }
 
-            status.innerText = "Processing AI Background Removal via Python Backend (It may take up to 1 minute if the server is sleeping)...";
+            status.innerText = "Processing AI Background Removal (It may take 1 min if backend is waking up)...";
 
             try {
-                // फ़िक्स: URL पूरी तरह से ऑटोमैटिक है। यह हमेशा उसी सर्वर पर हिट करेगा जहाँ यह लाइव चल रहा है।
-                const endpoint = "/remove-bg";
+                // ⚠️ DHYAN DEN: Niche apna sahi Render App domain URL paste karein!
+                const endpoint = "https://makar7.onrender.com/remove-bg";
 
                 const response = await fetch(endpoint, {
                     method: "POST",
