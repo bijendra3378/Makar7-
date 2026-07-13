@@ -60,4 +60,4 @@ def remove_background():
     except Exception as e:
         return jsonify({
             "success": False,
-            "message": str(e)
+            "message": str(e
