@@ -1,4 +1,4 @@
-Flask
-rembg[cpu]
-Pillow
+flask
+rembg
+pillow
 gunicorn
