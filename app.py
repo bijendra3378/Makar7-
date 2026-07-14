@@ -1,64 +1,73 @@
-import base64
+import os
 import io
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, render_template, send_file
 from PIL import Image
-from rembg import remove, new_session
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__)
 
-# शुरुआत में इसे None रखेंगे ताकि ऐप तुरंत स्टार्ट हो जाए
-model_session = None
+# इमेज अपलोड करने का साइज लिमिट (Optional: 16MB तक)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # 1. चेक करना कि यूजर ने फाइल सेलेक्ट की है या नहीं
+        if 'image' not in request.files:
+            return "कोई फाइल नहीं मिली!", 400
+        
+        file = request.files['image']
+        
+        if file.filename == '':
+            return "कृपया एक इमेज सेलेक्ट करें!", 400
 
-@app.route("/remove-bg", methods=["POST"])
-def remove_bg():
-    global model_session
-    try:
-        data = request.get_json()
-        if not data or "image" not in data:
-            return jsonify({"success": False, "message": "No image data provided"}), 400
+        if file:
+            # ⭐ जादू यहाँ है: rembg को यहाँ अंदर इम्पोर्ट किया है
+            # इससे Render ऐप को बिना किसी देरी के तुरंत 'Live' कर देगा!
+            from rembg import remove
+            
+            # 2. अपलोड की गई इमेज को रीड करना
+            input_image = file.read()
+            
+            # 3. rembg से बैकग्राउंड हटाना
+            output_image = remove(input_image)
+            
+            # 4. बिना सर्वर पर सेव किए, सीधे यूजर को PNG फाइल डाउनलोड करवा देना
+            return send_file(
+                io.BytesIO(output_image),
+                mimetype='image/png',
+                as_attachment=True,
+                download_name='bg_removed.png'
+            )
 
-        image_data = data["image"]
-        target_color = data.get("color", "original")
+    # GET Request: जब यूजर पहली बार वेबसाइट खोलेगा तो यह सिंपल फॉर्म दिखेगा
+    return '''
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <title>AI Background Remover</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
+            .container { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0px 0px 10px #ccc; }
+            input[type=file] { margin: 20px 0; }
+            input[type=submit] { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+            input[type=submit]:hover { background: #0056b3; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+            <h2>AI Background Remover 🤖</h2>
+            <p>अपनी फोटो अपलोड करें और तुरंत बैकग्राउंड हटाएं</p>
+            <form method="post" enctype="multipart/form-data">
+              <input type="file" name="image" accept="image/*" required><br>
+              <input type="submit" value="Remove Background & Download">
+            </form>
+        </div>
+      </body>
+    </html>
+    '''
 
-        if "," in image_data:
-            header, image_data = image_data.split(",", 1)
-
-        img_bytes = base64.b64decode(image_data)
-        input_image = Image.open(io.BytesIO(img_bytes))
-
-        # मॉडल पहली फोटो प्रोसेस करते समय बैकग्राउंड में डाउनलोड होगा
-        if model_session is None:
-            model_session = new_session("u2netp")
-
-        output_image = remove(input_image, session=model_session)
-
-        if target_color in ["white", "blue"]:
-            if target_color == "white":
-                bg_color = (255, 255, 255, 255)
-            else:
-                bg_color = (0, 112, 192, 255)
-
-            solid_bg = Image.new("RGBA", output_image.size, bg_color)
-            final_image = Image.alpha_composite(solid_bg, output_image.convert("RGBA"))
-        else:
-            final_image = output_image
-
-        buffered = io.BytesIO()
-        final_image.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-
-        return jsonify({
-            "success": True,
-            "image": f"data:image/png;base64,{img_str}"
-        })
-
-    except Exception as e:
-        print("Error during processing:", str(e))
-        return jsonify({"success": False, "message": str(e)}), 500
-
-if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+if __name__ == '__main__':
+    # Render ऑटोमैटिकली PORT एनवायरनमेंट वेरिएबल देता है
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
