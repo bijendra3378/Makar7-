@@ -1,4 +1,4 @@
 Flask
-rembg
+rembg[cpu]
 Pillow
 gunicorn
