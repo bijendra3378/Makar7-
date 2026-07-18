@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="EY6Zad842ktm-smtiVoeq7Ya9vjKGKC9s6WAmS5smPY" />
-    <title>MAKAR7 - Professional HD Passport Photo Maker</title>
+    <title>MAKAR7 - Passport Photo Maker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,39 +13,53 @@
     <style>
         /* ===== MAIN APPLICATION STYLES ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: linear-gradient(135deg, #07111f, #162447, #2563eb); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; padding-bottom: 100px; }
+        
+        /* PREMIUM LOW-BRIGHTNESS DARK BACKGROUND */
+        body { 
+            background: linear-gradient(135deg, #090d16, #111827, #1e293b); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            padding-bottom: 100px; 
+        }
+        
         .container { width: 100%; max-width: 1100px; margin-bottom: 30px; }
-        .card { background: rgba(255, 255, 255, .08); backdrop-filter: blur(20px); border-radius: 25px; padding: 30px; box-shadow: 0 15px 40px rgba(0, 0, 0, .35); }
+        .card { background: rgba(255, 255, 255, .05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 25px; padding: 30px; box-shadow: 0 20px 50px rgba(0, 0, 0, .4); }
         .header { text-align: center; color: #fff; margin-bottom: 25px; }
         .header i { font-size: 60px; color: #60a5fa; }
-        .header h1 { font-size: 42px; margin-top: 10px; }
-        .header p { opacity: .9; font-size: 18px; font-weight: 500; margin-top: 5px; }
-        .upload-box label { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 180px; border: 2px dashed rgba(255, 255, 255, .5); border-radius: 18px; color: #fff; cursor: pointer; transition: .3s; }
-        .upload-box label:hover { background: rgba(255, 255, 255, .08); }
-        .upload-box i { font-size: 55px; margin-bottom: 10px; }
+        .header h1 { font-size: 42px; margin-top: 10px; letter-spacing: 1px; }
+        .header p { opacity: .8; font-size: 18px; font-weight: 500; margin-top: 5px; color: #94a3b8; }
+        .upload-box label { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 180px; border: 2px dashed rgba(255, 255, 255, .25); border-radius: 18px; color: #fff; cursor: pointer; transition: .3s; }
+        .upload-box label:hover { background: rgba(255, 255, 255, .05); border-color: #60a5fa; }
+        .upload-box i { font-size: 55px; margin-bottom: 10px; color: #38bdf8; }
         #cropSection { margin-top: 25px; }
         #cropSection h2 { color: #fff; margin-bottom: 15px; text-align: center; }
         #cropImage { max-width: 100%; max-height: 400px; object-fit: contain; display: block; border-radius: 15px; background: #fff; margin: 0 auto; }
         .buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 15px; margin: 20px 0; }
         .buttons button { padding: 15px; border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: .3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .buttons button:hover { transform: translateY(-3px); }
+        .buttons button:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         #generateBtn { background: #2563eb; }
-        #printBtn { background: #f59e0b; }
-        #downloadBtn { background: #ef4444; }
-        #zoomInBtn, #zoomOutBtn, #rotateLeftBtn, #rotateRightBtn { background: #4b5563; }
+        #printBtn { background: #d97706; }
+        #downloadBtn { background: #dc2626; }
+        #zoomInBtn, #zoomOutBtn, #rotateLeftBtn, #rotateRightBtn { background: #374151; }
         .crop-apply-container { width: 100%; display: flex; justify-content: center; margin-top: 20px; }
-        #cropApplyBtn { background: linear-gradient(135deg, #10b981, #059669); padding: 18px 40px; font-size: 18px; font-weight: 700; border: none; border-radius: 16px; color: #fff; cursor: pointer; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); width: 100%; max-width: 400px; }
+        #cropApplyBtn { background: linear-gradient(135deg, #059669, #047857); padding: 18px 40px; font-size: 18px; font-weight: 700; border: none; border-radius: 16px; color: #fff; cursor: pointer; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3); width: 100%; max-width: 400px; }
 
-        .preview { background: #fff; padding: 20px; border-radius: 20px; margin-top: 20px; }
-        .preview h2 { text-align: center; margin-bottom: 15px; color: #333; }
-        .canvas-container { width: 100%; display: flex; justify-content: center; align-items: center; background: #e5e7eb; padding: 15px; border-radius: 12px; min-height: 300px; overflow: hidden; }
-        canvas { max-width: 100%; height: auto; display: block; border: 2px solid #ddd; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* FIXED: 2nd IMAGE JAISA WHITE CLEAN CARD DESIGN */
+        .preview { background: #ffffff; padding: 25px; border-radius: 20px; margin-top: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .preview h2 { text-align: center; margin-bottom: 20px; color: #1e293b; font-weight: 600; }
+        .canvas-container { width: 100%; display: flex; justify-content: center; align-items: center; background: #ffffff; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0; min-height: 300px; overflow: hidden; }
+        canvas { max-width: 100%; height: auto; display: block; border: 1px solid #cbd5e1; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-        .passport-settings { margin-top: 25px; background: rgba(255, 255, 255, .08); padding: 20px; border-radius: 15px; }
+        .passport-settings { margin-top: 25px; background: rgba(255, 255, 255, .05); padding: 20px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.02); }
         .passport-settings h3 { color: #fff; margin-bottom: 15px; }
-        .passport-settings label { display: block; color: #fff; margin-top: 15px; margin-bottom: 8px; }
-        .passport-settings select { width: 100%; padding: 10px; border: none; border-radius: 10px; margin-bottom: 10px; font-weight: 500; }
-        #status { text-align: center; color: #fff; margin-top: 20px; font-weight: 500; }
+        .passport-settings label { display: block; color: #cbd5e1; margin-top: 15px; margin-bottom: 8px; font-size: 14px; }
+        .passport-settings select { width: 100%; padding: 12px; border: 1px solid #334155; background: #0f172a; color: #fff; border-radius: 10px; margin-bottom: 10px; font-weight: 500; outline: none; }
+        .passport-settings select:focus { border-color: #60a5fa; }
+        #status { text-align: center; color: #94a3b8; margin-top: 20px; font-weight: 500; }
 
         /* ==================== FOOTER LINKS STYLE ==================== */
         .footer-container {
@@ -53,7 +67,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: linear-gradient(180deg, #0f172a 0%, #070a13 100%);
+            background: linear-gradient(180deg, #090d16 0%, #05070c 100%);
             border-top: 1px solid #1e293b;
             padding: 20px 0;
             text-align: center;
@@ -72,8 +86,8 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(3, 7, 18, 0.8);
-            backdrop-filter: blur(5px);
+            background-color: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(8px);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -81,16 +95,16 @@
 
         /* ==================== MODAL CONTENT BOX ==================== */
         .modal-content {
-            background-color: #111827;
+            background-color: #0f172a;
             color: #f3f4f6;
             margin: 8% auto;
             padding: 30px;
-            border: 1px solid #1f2937;
+            border: 1px solid #1e293b;
             width: 90%;
             max-width: 520px;
             border-radius: 16px;
             position: relative;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             transform: scale(0.9);
             transition: transform 0.3s ease;
             box-sizing: border-box;
@@ -100,23 +114,23 @@
 
         /* Custom Modern Scrollbar Design */
         .modal-content.scrollable::-webkit-scrollbar { width: 6px; }
-        .modal-content.scrollable::-webkit-scrollbar-track { background: #1f2937; border-radius: 10px; }
-        .modal-content.scrollable::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
-        .modal-content.scrollable::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        .modal-content.scrollable::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+        .modal-content.scrollable::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        .modal-content.scrollable::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
         /* Close Button (X icon) */
         .close-btn { color: #9ca3af; position: absolute; top: 18px; right: 22px; font-size: 26px; font-weight: 400; cursor: pointer; transition: color 0.2s, transform 0.2s; line-height: 1; }
         .close-btn:hover { color: #ffffff; transform: rotate(90deg); }
 
-        .modal-content h2 { margin-top: 0; font-size: 22px; font-weight: 600; color: #38bdf8; border-bottom: 1px solid #1f2937; padding-bottom: 12px; margin-bottom: 15px; text-align: left; }
+        .modal-content h2 { margin-top: 0; font-size: 22px; font-weight: 600; color: #38bdf8; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 15px; text-align: left; }
         .modal-content h3 { font-size: 16px; font-weight: 600; color: #38bdf8; margin-top: 20px; margin-bottom: 8px; text-align: left; }
-        .modal-content p { font-size: 13.5px; color: #d1d5db; line-height: 1.6; margin-bottom: 12px; text-align: left; }
+        .modal-content p { font-size: 13.5px; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px; text-align: left; }
         .modal-content ul { margin: 0 0 15px 0; padding-left: 20px; text-align: left; }
-        .modal-content li { font-size: 13.5px; color: #d1d5db; line-height: 1.6; margin-bottom: 6px; }
-        .last-updated { font-size: 11.5px !important; color: #6b7280 !important; margin-top: -5px; margin-bottom: 15px; }
+        .modal-content li { font-size: 13.5px; color: #cbd5e1; line-height: 1.6; margin-bottom: 6px; }
+        .last-updated { font-size: 11.5px !important; color: #64748b !important; margin-top: -5px; margin-bottom: 15px; }
 
-        .email-box { background: #1f2937; padding: 14px; border-radius: 8px; margin: 18px 0; border: 1px dashed #38bdf8; text-align: left; }
-        .email-box strong { color: #9ca3af; font-size: 12px; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
+        .email-box { background: #1e293b; padding: 14px; border-radius: 8px; margin: 18px 0; border: 1px dashed #38bdf8; text-align: left; }
+        .email-box strong { color: #94a3b8; font-size: 12px; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
         .email-box a { color: #38bdf8; text-decoration: none; font-weight: 600; font-size: 14px; }
         .email-box a:hover { text-decoration: underline; }
     </style>
@@ -161,6 +175,7 @@
                 <button id="downloadBtn"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
             </div>
 
+            <!-- PREVIEW CARD CHANGER TO WHITE (AS PER IMAGE 2) -->
             <div class="preview">
                 <h2>Passport Photo Preview</h2>
                 <div class="canvas-container">
@@ -171,8 +186,12 @@
             <div class="passport-settings">
                 <h3>Passport Settings</h3>
 
-                <!-- Hidden Input to secure 300 DPI logic processing without UI exposure -->
-                <input type="hidden" id="qualitySelect" value="300">
+                <div style="display: none;">
+                    <label>Photo Quality</label>
+                    <select id="qualitySelect">
+                        <option value="300" selected>HD 300 DPI</option>
+                    </select>
+                </div>
 
                 <label>Paper Size</label>
                 <select id="paperSizeSelect">
@@ -236,7 +255,7 @@
         <div class="modal-content scrollable">
             <span class="close-btn" onclick="closeModal('privacy-modal')">&times;</span>
             <h2>Privacy Policy</h2>
-            <p class="last-updated">Last Updated: July 17, 2026</p>
+            <p class="last-updated">Last Updated: July 18, 2026</p>
             <p>Welcome to MAKAR7 – Professional HD Passport Photo Maker. Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your information when you use our website.</p>
 
             <h3>Information We Collect</h3>
@@ -284,7 +303,7 @@
         <div class="modal-content scrollable">
             <span class="close-btn" onclick="closeModal('terms-modal')">&times;</span>
             <h2>Terms & Conditions</h2>
-            <p class="last-updated">Last Updated: July 17, 2026</p>
+            <p class="last-updated">Last Updated: July 18, 2026</p>
             <p>Welcome to MAKAR7 – Professional HD Passport Photo Maker. By accessing or using this website, you agree to comply with these Terms & Conditions.</p>
 
             <h3>Use of the Website</h3>
@@ -326,7 +345,6 @@
         const generateBtn = document.getElementById("generateBtn");
         const generateBtnText = document.getElementById("generateBtnText");
         const paperSizeSelect = document.getElementById("paperSizeSelect");
-        const qualitySelect = document.getElementById("qualitySelect");
         const borderSelect = document.getElementById("borderSelect");
         const status = document.getElementById("status");
         const printBtn = document.getElementById("printBtn");
@@ -336,7 +354,6 @@
         let img = new Image();
 
         function updateCanvasDimensions() {
-            // Fixed processing output scale at high quality 300 DPI layout architecture
             if (paperSizeSelect.value === "4x6") {
                 canvas.width = 1800;  
                 canvas.height = 1200; 
@@ -369,7 +386,6 @@
         });
 
         cropApplyBtn.onclick = () => {
-            // Processing high resolution pixels for 35x45mm scale at true 300 DPI
             const croppedCanvas = cropper.getCroppedCanvas({ width: 413, height: 531 });
             img.onload = () => {
                 updateCanvasDimensions();
@@ -421,7 +437,7 @@
                 }
             }
 
-            status.innerText = "8 Photos Generated! Placed perfectly at standard scale format (300 DPI).";
+            status.innerText = "8 Photos Generated! Placed perfectly at 35x45mm standard scale format.";
         };
 
         printBtn.onclick = function () {
@@ -463,7 +479,7 @@
                 pdf.addImage(image, "JPEG", 0, 0, 210, 297);
             }
 
-            pdf.save(`MAKAR7-8Photos-${paperSizeSelect.value.toUpperCase()}-300DPI.pdf`);
+            pdf.save(`MAKAR7-8Photos-${paperSizeSelect.value.toUpperCase()}.pdf`);
         };
 
         document.getElementById("zoomInBtn").onclick = () => cropper.zoom(0.1);
